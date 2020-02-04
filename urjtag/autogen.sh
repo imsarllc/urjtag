@@ -34,3 +34,4 @@ else
 fi
 
 ./configure --enable-maintainer-mode "$@"
+#./configure --enable-stapl --enable-maintainer-mode --with-ftd2xx "$@"
