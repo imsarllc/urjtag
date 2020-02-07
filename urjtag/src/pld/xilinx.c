@@ -731,6 +731,26 @@ xlx_detect_xc4v (urj_pld_t *pld)
 }
 
 static int
+xlx_detect_xc7a (urj_pld_t *pld)
+{
+    urj_part_t *part = pld->part;
+    uint32_t idcode;
+    uint32_t family;
+
+    /* get fpga family from idcode */
+    idcode = urj_tap_register_get_value (part->id);
+    family = (idcode >> 21) & 0x7f;
+
+    switch (family)
+    {
+        case XILINX_FAMILY_XC7A:
+            return URJ_STATUS_OK;
+        default:
+            return URJ_STATUS_FAIL;
+    }
+}
+
+static int
 xlx_detect_xc6s (urj_pld_t *pld)
 {
     urj_part_t *part = pld->part;
@@ -774,7 +794,19 @@ const urj_pld_driver_t urj_pld_xc6s_driver = {
 
 const urj_pld_driver_t urj_pld_xc4v_driver = {
     .name = N_("Xilinx Virtex 4 Family"),
-    .detect = xlx_detect_xc4v,
+    .detect = xlx_detect_xc7a,
+    .print_status = xlx_print_status_xc4v,
+    .configure = xlx_configure,
+    .reconfigure = xlx_reconfigure,
+    .read_register = xlx_read_register_xc4v,
+    .write_register = xlx_write_register_xc4v,
+    .register_width = 2,
+};
+
+
+const urj_pld_driver_t urj_pld_xc7_driver = {
+    .name = N_("Xilinx 7 Family"),
+    .detect = xlx_detect_xc7a,
     .print_status = xlx_print_status_xc4v,
     .configure = xlx_configure,
     .reconfigure = xlx_reconfigure,
