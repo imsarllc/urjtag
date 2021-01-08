@@ -4,24 +4,24 @@
 
 wd=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-build=armv7l
-
 # docker container only
 $travis || $wd/clean.sh
 
 pushd urjtag
 
 # `export` required for setup.py
-export CC=arm-linux-gnueabihf-gcc
-export LDSHARED=arm-linux-gnueabihf-gcc
+export CC=$toolchain-gcc
+export LDSHARED=$toolchain-gcc
 prefix=$wd/usr
-CPP=arm-linux-gnueabihf-cpp PYTHON=/usr/bin/python3.5 \
+CPP=$toolchain-cpp \
+ PYTHON=/usr/bin/python$PY_VER \
  ./autogen.sh \
- --host=arm-linux-gnueabihf \
+ --host=$toolchain \
  --enable-svf \
  --enable-bsdl \
  --enable-stapl \
- --enable-relocatable --prefix=$prefix
+ --enable-relocatable \
+ --prefix=$prefix
 
 # copy auto-generated files
 cp src/bsdl/bsdl_bison.c.copy src/bsdl/bsdl_bison.c
@@ -40,13 +40,14 @@ find . -name "*urjtag*.so*" | xargs ls -l
 make install
 
 cp -f \
- bindings/python/build/lib.linux-x86_64-3.5/urjtag.cpython-35m-x86_64-linux-gnu.so \
- urjtag.cpython-35m-arm-linux-gnueabihf.so
+ bindings/python/build/lib.linux-x86_64-$PY_VER/urjtag.cpython-$(echo $PY_VER | tr -d '.')m-x86_64-linux-gnu.so \
+ urjtag.cpython-$(echo $PY_VER | tr -d '.')m-$toolchain.so
 $wd/package.sh \
- armhf \
+ $arch \
+ $toolchain \
  $prefix/bin/jtag \
  $prefix/share/urjtag \
- urjtag.cpython-35m-arm-linux-gnueabihf.so \
+ urjtag.cpython-$(echo $PY_VER | tr -d '.')m-$toolchain.so \
  src/.libs/liburjtag.so*
 
 popd # urjtag
